@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>主页</title>
+</head>
+
+<body>
+    <h1>Hello World</h1>
+    <button id="loginBtn">前往登录</button>
+    <button id="registerBtn">前往注册</button>
+
+    <script src="./javascripts/jquery.min.js"></script>
+    <script src="./javascripts/axios.min.js"></script>
+
+    <script>
+
+        request({
+            url: '/users/isLogin',
+            method: 'get',
+        }).then(res => {
+            alert(`欢迎您${res.data.data}`)
+        }).catch(err => {
+            if (err === 401) {
+                alert('权限不足')
+            }
+        })
+
+        // 由于我们每次请求前都需要携带 token 所以我们直接创建一个实例方法
+        function request(config) {
+            const instance = axios.create({
+                baseURL: 'http://localhost:3000',
+            })
+            instance.interceptors.request.use(config => {
+                if (localStorage.getItem('token')) { // 如果存在 token 就携带
+                    config.headers.authorization = localStorage.getItem('token')
+                }
+                return config
+            }, err => {
+                console.log(err)
+            })
+            instance.interceptors.response.use((response) => {
+                // 对响应数据做点什么
+                return response;
+            }, function (error) {
+                // 对响应错误做点什么
+                if (error.response && error.response.status === 401) {
+                    error = error.response.status
+                }
+                return Promise.reject(error)
+            });
+            return instance(config)
+        }
+
+        $("#loginBtn").click(() => {
+            window.location.href = window.location.href + 'login.html'
+        })
+
+        $("#loginBtn").click(() => {
+            window.location.href = window.location.href + 'register.html'
+        })
+
+    </script>
+</body>
+
+</html>
